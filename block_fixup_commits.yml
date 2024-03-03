@@ -1,0 +1,30 @@
+# Copyright (C) 2024 Jos de Koning - All Rights Reserved
+#
+# You may use, distribute and modify this code under the
+# terms of the BSD-3-Clause license.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: Block Fixup Commits
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  check-fixup-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check for fixup commits
+        run: |
+          fixup_commits=$(git log --oneline ${{ github.event.before }}..${{ github.sha }} | grep '^[0-9a-f]\{7,\} fixup!')
+          if [ -n "$fixup_commits" ]; then
+            echo "Fixup commits found. Please rebase and squash them before merging."
+            exit 1
+          fi
